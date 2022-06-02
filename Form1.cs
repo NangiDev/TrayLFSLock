@@ -42,7 +42,8 @@ namespace TrayLock
         }
         private static void ListDirectory(TreeView treeView, string path)
         {
-            Extensions = File.ReadAllLines(path + "/.gitattributes")
+            var gitattributes = (path + "/.gitattributes").Replace("\\","/");
+            Extensions = File.ReadAllLines(gitattributes)
                 .Where(x =>
                     !x.StartsWith("#") &&
                     x.ToLower().Contains("filter=lfs") &&

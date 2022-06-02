@@ -7,10 +7,13 @@
     <UseWindowsForms>true</UseWindowsForms>
     <ImplicitUsings>disable</ImplicitUsings>
     <RuntimeIdentifier>win10-x64</RuntimeIdentifier>
-    <PublishSingleFile>true</PublishSingleFile>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Update="App.config">
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+    </None>
     <PackageReference Include="LibGit2Sharp" Version="0.26.2" />
   </ItemGroup>
 
