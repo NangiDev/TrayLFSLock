@@ -9,3 +9,6 @@ that helps non-terminal savy developers to work with a simple and fast GUI.
  - Inside the generated 'bin\Release\net5.0-windows\win10-x64\publish' directory is the .exe located.
  - Run
  - Profit!
+
+# Screenshot
+![Usage](Screenshots/TrayLFSLock.gif)
