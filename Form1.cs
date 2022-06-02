@@ -7,16 +7,28 @@ using System.Linq;
 using System.Diagnostics;
 using LibGit2Sharp;
 using System.Collections.Generic;
+using System.Configuration;
 
 namespace TrayLock
 {
     public partial class LockTray : Form
     {
+        private static readonly string repoPath = ConfigurationManager.AppSettings.Get("RepoPath") ?? "";
+        public static string GetRepoPath()
+        {
+            return repoPath;
+        }
+
+        private static readonly string repoName = ConfigurationManager.AppSettings.Get("RepoName") ?? "";
+        public static string GetRepoName()
+        {
+            return repoName;
+        }
+
         private NotifyIcon sysTrayIcon;
         private ContextMenuStrip sysTrayMenu;
-        private static readonly string RepoPath = "C:/Users/jsett/Documents/Unreal Projects/Athyl";
-        private static readonly string RepoName = "Athyl";
-        private static readonly Repository repo = new(RepoPath);
+
+        private static readonly Repository repo = new(GetRepoPath());
         private static readonly HashSet<string> LockedFilePaths = new();
         private static string[] Extensions = Array.Empty<string>();
 
@@ -25,7 +37,7 @@ namespace TrayLock
             InitializeComponent();
             sysTrayMenu = InitTrayMenu();
             sysTrayIcon = InitIcon();
-            ListDirectory(FileTreeView, RepoPath);
+            ListDirectory(FileTreeView, GetRepoPath());
             return;
         }
         private static void ListDirectory(TreeView treeView, string path)
@@ -60,11 +72,11 @@ namespace TrayLock
                 }
             }
 
-            var rootNode = new TreeNode(RepoName);
+            var rootNode = new TreeNode(GetRepoName());
             rootNode.BackColor = Color.LightGray;
             Dictionary<string, TreeNode> structureTree = new()
             {
-                { RepoName, rootNode }
+                { GetRepoName(), rootNode }
             };
 
             foreach (IndexEntry e in repo.Index)
@@ -115,7 +127,7 @@ namespace TrayLock
                 } else
                 {
                     if(structureTree.TryAdd(path, node))
-                        structureTree[RepoName].Nodes.Add(node);
+                        structureTree[GetRepoName()].Nodes.Add(node);
                 }
                 key += parents[i];
             }
@@ -132,7 +144,7 @@ namespace TrayLock
         {
             sysTrayIcon = new()
             {
-                Text = "GitLock",
+                Text = "TrayLock",
                 Icon = new Icon(SystemIcons.Shield, 40, 40),
                 ContextMenuStrip = sysTrayMenu,
                 Visible = true
@@ -172,7 +184,7 @@ namespace TrayLock
 
         private void LockBtn_Click(object sender, EventArgs e)
         {
-            var fileName = FileTreeView.SelectedNode.FullPath.Replace("\\", "/").Replace(RepoName, ".");
+            var fileName = FileTreeView.SelectedNode.FullPath.Replace("\\", "/").Replace(GetRepoName(), ".");
             if (LockedFilePaths.Contains(fileName)) return;
 
             var info = new ProcessStartInfo("git", $"lfs lock '{fileName}'")
@@ -180,7 +192,7 @@ namespace TrayLock
                 CreateNoWindow = true,
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
-                WorkingDirectory = RepoPath,
+                WorkingDirectory = GetRepoPath(),
             };
 
             var lockProcess = Process.Start(info);
@@ -198,7 +210,7 @@ namespace TrayLock
 
         private void UnlockBtn_Click(object sender, EventArgs e)
         {
-            var fileName = FileTreeView.SelectedNode.FullPath.Replace("\\", "/").Replace(RepoName, ".");
+            var fileName = FileTreeView.SelectedNode.FullPath.Replace("\\", "/").Replace(GetRepoName(), ".");
             if (!LockedFilePaths.Contains(fileName)) return;
 
             var info = new ProcessStartInfo("git", $"lfs unlock '{fileName}'")
@@ -206,7 +218,7 @@ namespace TrayLock
                 CreateNoWindow = true,
                 RedirectStandardOutput = true,
                 UseShellExecute = false,
-                WorkingDirectory = RepoPath,
+                WorkingDirectory = GetRepoPath(),
             };
 
             var lockProcess = Process.Start(info);
